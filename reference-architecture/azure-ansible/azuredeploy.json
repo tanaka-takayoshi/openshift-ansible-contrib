@@ -551,8 +551,7 @@
         "count" : "[parameters('numberOfNodes')]"
       },
       "dependsOn" : [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('nodeStorageName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
       ],
       "properties" : {
         "mode" : "Incremental",
@@ -597,7 +596,6 @@
       "apiVersion" : "2015-01-01",
       "dependsOn" : [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('nodeStorageName'))]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('registryStorageName'))]"
       ],
       "properties" : {
@@ -690,8 +688,7 @@
       "type" : "Microsoft.Resources/deployments",
       "apiVersion" : "2015-01-01",
       "dependsOn" : [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('nodeStorageName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
       ],
       "properties" : {
         "mode" : "Incremental",
@@ -762,8 +759,7 @@
       "type" : "Microsoft.Resources/deployments",
       "apiVersion" : "2015-01-01",
       "dependsOn" : [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('nodeStorageName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
       ],
       "properties" : {
         "mode" : "Incremental",
@@ -834,8 +830,7 @@
       "type" : "Microsoft.Resources/deployments",
       "apiVersion" : "2015-01-01",
       "dependsOn" : [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('nodeStorageName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
       ],
       "properties" : {
         "mode" : "Incremental",
@@ -906,8 +901,7 @@
       "type" : "Microsoft.Resources/deployments",
       "apiVersion" : "2015-01-01",
       "dependsOn" : [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('nodeStorageName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
       ],
       "properties" : {
         "mode" : "Incremental",
@@ -957,8 +951,7 @@
       "type" : "Microsoft.Resources/deployments",
       "apiVersion" : "2015-01-01",
       "dependsOn" : [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('nodeStorageName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
       ],
       "properties" : {
         "mode" : "Incremental",
@@ -1008,8 +1001,7 @@
       "type" : "Microsoft.Resources/deployments",
       "apiVersion" : "2015-01-01",
       "dependsOn" : [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('nodeStorageName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
       ],
       "properties" : {
         "mode" : "Incremental",

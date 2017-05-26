@@ -38,12 +38,6 @@
     "routerExtIP" : {
       "type" : "string"
     },
-    "imageReference" : {
-      "type" : "object",
-      "metadata" : {
-        "description" : "imageReference object that should be used to create the virtual machine"
-      }
-    },
     "RHNUserName" : {
       "type" : "string"
     },
