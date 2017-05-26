@@ -17,8 +17,14 @@
     "numberOfNodes" : {
       "value" : 3
     },
-    "image" : {
-      "value" : "rhel"
+    "nodeStorageName" : {
+      "value" : ""
+    },
+    "diskContainer": {
+      "value" : ""
+    },
+    "osImageName": {
+      "value" : ""
     },
     "RHNUserName" : {
       "value" : ""

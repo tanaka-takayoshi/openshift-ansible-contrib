@@ -40,6 +40,9 @@
     },
     "availabilitySet" : {
       "type" : "string"
+    },
+    "osImageUri": {
+      "type": "string"
     }
   },
   "variables" : {
@@ -111,9 +114,12 @@
           }
         },
         "storageProfile" : {
-          "imageReference" : "[parameters('imageReference')]",
           "osDisk" : {
             "name" : "osdisk",
+            "osType": "linux",
+            "image": {
+              "uri": "[parameters('osImageUri')]"
+            },
             "vhd" : {
               "uri" : "[concat('http://', parameters('sa'), '.blob.core.windows.net/openshiftvmachines/', parameters('vmName'), '.vhd')]"
             },

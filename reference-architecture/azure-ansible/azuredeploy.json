@@ -37,14 +37,22 @@
         "description" : "Number of OpenShift Nodes to deploy (max 30)"
       }
     },
-    "image" : {
-      "type" : "string",
-      "allowedValues" : [
-        "rhel"
-      ],
-      "defaultValue" : "rhel",
+    "nodeStorageName": {
+      "type": "string",
       "metadata" : {
-        "description" : "OS to use.Red Hat Enterprise Linux"
+        "description" : "Storage Account name for nodes. This storage must be created before."
+      }
+    },
+    "diskContainer": {
+      "type": "string",
+      "metadata" : {
+        "description" : "diskContainer name for os disk."
+      }
+    },
+    "osImageName": {
+      "type": "string",
+      "metadata" : {
+        "description" : "OS disk image name without .vhd. The VHD should be uploaded before."
       }
     },
     "masterVMSize" : {
@@ -276,8 +284,8 @@
     }
   },
   "variables" : {
-    "gituser" : "openshift",
-    "branch" : "master",
+    "gituser" : "tanaka-takayoshi",
+    "branch" : "customimage",
     "baseTemplateUrl" : "[concat('https://raw.githubusercontent.com/',variables('gituser'),'/openshift-ansible-contrib/',variables('branch'),'/reference-architecture/azure-ansible/')]",
     "baseVMachineTemplateUriInfranode" : "[concat(variables('baseTemplateUrl'), 'infranode.json')]",
     "baseVMachineTemplateUriNode" : "[concat(variables('baseTemplateUrl'), 'node.json')]",
@@ -291,20 +299,13 @@
     "nodesubnetPrefix" : "10.0.1.0/24",
     "mastersubnetName" : "masterSubnet",
     "mastersubnetPrefix" : "10.0.0.0/24",
-    "infranodeStorageName" : "[concat('sainf', resourceGroup().name)]",
-    "nodeStorageName" : "[concat('sanod', resourceGroup().name)]",
-    "masterStorageName" : "[concat('samas', resourceGroup().name)]",
+    "nodeStorageName" : "[parameters('nodeStorageName')]",
+    "osImageUri": "[concat('https://', variables('nodeStorageName'),'.blob.core.windows.net/',parameters('diskContainer'),'/',parameters('osImageName'),'.vhd')]",
     "vhdStorageType" : "Premium_LRS",
     "vnetId" : "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "infranodeSubnetRef" : "[concat(variables('vnetId'), '/subnets/', variables('infranodesubnetName'))]",
     "nodeSubnetRef" : "[concat(variables('vnetId'), '/subnets/', variables('nodesubnetName'))]",
     "masterSubnetRef" : "[concat(variables('vnetId'), '/subnets/', variables('mastersubnetName'))]",
-    "rhel" : {
-      "publisher" : "Redhat",
-      "offer" : "RHEL",
-      "sku" : "7.3",
-      "version" : "latest"
-    },
     "baseVMachineTemplateUriBastion" : "[concat(variables('baseTemplateUrl'), 'bastion.json')]",
     "vmSizesMap" : {
       "Standard_A2" : {
@@ -506,42 +507,6 @@
   },
   "resources" : [
     {
-      "type" : "Microsoft.Storage/storageAccounts",
-      "name" : "[variables('infranodeStorageName')]",
-      "apiVersion" : "[variables('apiVersion')]",
-      "location" : "[variables('location')]",
-      "tags" : {
-        "displayName" : "StorageAccount"
-      },
-      "properties" : {
-        "accountType" : "[variables('vmSizesMap')[parameters('infranodeVMSize')].storageAccountType]"
-      }
-    },
-    {
-      "type" : "Microsoft.Storage/storageAccounts",
-      "name" : "[variables('nodeStorageName')]",
-      "apiVersion" : "[variables('apiVersion')]",
-      "location" : "[variables('location')]",
-      "tags" : {
-        "displayName" : "StorageAccount"
-      },
-      "properties" : {
-        "accountType" : "[variables('vmSizesMap')[parameters('nodeVmSize')].storageAccountType]"
-      }
-    },
-    {
-      "type" : "Microsoft.Storage/storageAccounts",
-      "name" : "[variables('masterStorageName')]",
-      "apiVersion" : "[variables('apiVersion')]",
-      "location" : "[variables('location')]",
-      "tags" : {
-        "displayName" : "StorageAccount"
-      },
-      "properties" : {
-        "accountType" : "[variables('vmSizesMap')[parameters('masterVMSize')].storageAccountType]"
-      }
-    },
-    {
       "apiVersion" : "[variables('apiVersion')]",
       "type" : "Microsoft.Network/virtualNetworks",
       "name" : "[variables('virtualNetworkName')]",
@@ -617,8 +582,8 @@
           "baseTemplateUrl" : {
             "value" : "[variables('baseTemplateUrl')]"
           },
-          "imageReference" : {
-            "value" : "[variables(parameters('image'))]"
+          "osImageUri" : {
+            "value" : "[variables('osImageUri')]"
           },
           "availabilitySet" : {
             "value" : "['nodeavailabilityset']"
@@ -632,7 +597,7 @@
       "apiVersion" : "2015-01-01",
       "dependsOn" : [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('masterStorageName'))]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('nodeStorageName'))]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('registryStorageName'))]"
       ],
       "properties" : {
@@ -649,7 +614,7 @@
             "value" : "[concat(resourceGroup().name,'b')]"
           },
           "sa" : {
-            "value" : "[variables('masterStorageName')]"
+            "value" : "[variables('nodeStorageName')]"
           },
           "subnetRef" : {
             "value" : "[variables('masterSubnetRef')]"
@@ -675,8 +640,8 @@
           "routerExtIP" : {
             "value" : "[reference(parameters('WildcardZone')).ipAddress]"
           },
-          "imageReference" : {
-            "value" : "[variables(parameters('image'))]"
+          "osImageUri" : {
+            "value" : "[variables('osImageUri')]"
           },
           "RHNUserName" : {
             "value" : "[parameters('RHNUserName')]"
@@ -726,7 +691,7 @@
       "apiVersion" : "2015-01-01",
       "dependsOn" : [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('masterStorageName'))]"
+        "[concat('Microsoft.Storage/storageAccounts/', variables('nodeStorageName'))]"
       ],
       "properties" : {
         "mode" : "Incremental",
@@ -742,7 +707,7 @@
             "value" : "[concat(resourceGroup().name,'m1')]"
           },
           "sa" : {
-            "value" : "[variables('masterStorageName')]"
+            "value" : "[variables('nodeStorageName')]"
           },
           "subnetRef" : {
             "value" : "[variables('masterSubnetRef')]"
@@ -768,8 +733,8 @@
           "routerExtIP" : {
             "value" : "[reference(parameters('WildcardZone')).ipAddress]"
           },
-          "imageReference" : {
-            "value" : "[variables(parameters('image'))]"
+          "osImageUri" : {
+            "value" : "[variables('osImageUri')]"
           },
           "RHNUserName" : {
             "value" : "[parameters('RHNUserName')]"
@@ -798,7 +763,7 @@
       "apiVersion" : "2015-01-01",
       "dependsOn" : [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('masterStorageName'))]"
+        "[concat('Microsoft.Storage/storageAccounts/', variables('nodeStorageName'))]"
       ],
       "properties" : {
         "mode" : "Incremental",
@@ -814,7 +779,7 @@
             "value" : "[concat(resourceGroup().name,'m2')]"
           },
           "sa" : {
-            "value" : "[variables('masterStorageName')]"
+            "value" : "[variables('nodeStorageName')]"
           },
           "subnetRef" : {
             "value" : "[variables('masterSubnetRef')]"
@@ -840,8 +805,8 @@
           "routerExtIP" : {
             "value" : "[reference(parameters('WildcardZone')).ipAddress]"
           },
-          "imageReference" : {
-            "value" : "[variables(parameters('image'))]"
+          "osImageUri" : {
+            "value" : "[variables('osImageUri')]"
           },
           "RHNUserName" : {
             "value" : "[parameters('RHNUserName')]"
@@ -870,7 +835,7 @@
       "apiVersion" : "2015-01-01",
       "dependsOn" : [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('masterStorageName'))]"
+        "[concat('Microsoft.Storage/storageAccounts/', variables('nodeStorageName'))]"
       ],
       "properties" : {
         "mode" : "Incremental",
@@ -886,7 +851,7 @@
             "value" : "[concat(resourceGroup().name,'m3')]"
           },
           "sa" : {
-            "value" : "[variables('masterStorageName')]"
+            "value" : "[variables('nodeStorageName')]"
           },
           "subnetRef" : {
             "value" : "[variables('masterSubnetRef')]"
@@ -912,8 +877,8 @@
           "routerExtIP" : {
             "value" : "[reference(parameters('WildcardZone')).ipAddress]"
           },
-          "imageReference" : {
-            "value" : "[variables(parameters('image'))]"
+          "osImageUri" : {
+            "value" : "[variables('osImageUri')]"
           },
           "RHNUserName" : {
             "value" : "[parameters('RHNUserName')]"
@@ -942,7 +907,7 @@
       "apiVersion" : "2015-01-01",
       "dependsOn" : [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('infranodeStorageName'))]"
+        "[concat('Microsoft.Storage/storageAccounts/', variables('nodeStorageName'))]"
       ],
       "properties" : {
         "mode" : "Incremental",
@@ -955,7 +920,7 @@
             "value" : "infranode1"
           },
           "sa" : {
-            "value" : "[variables('infranodeStorageName')]"
+            "value" : "[variables('nodeStorageName')]"
           },
           "subnetRef" : {
             "value" : "[variables('infranodeSubnetRef')]"
@@ -972,8 +937,8 @@
           "baseTemplateUrl" : {
             "value" : "[variables('baseTemplateUrl')]"
           },
-          "imageReference" : {
-            "value" : "[variables(parameters('image'))]"
+          "osImageUri" : {
+            "value" : "[variables('osImageUri')]"
           },
           "dnsName" : {
             "value" : "[concat(resourceGroup().name,'i1')]"
@@ -993,7 +958,7 @@
       "apiVersion" : "2015-01-01",
       "dependsOn" : [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('infranodeStorageName'))]"
+        "[concat('Microsoft.Storage/storageAccounts/', variables('nodeStorageName'))]"
       ],
       "properties" : {
         "mode" : "Incremental",
@@ -1006,7 +971,7 @@
             "value" : "infranode2"
           },
           "sa" : {
-            "value" : "[variables('infranodeStorageName')]"
+            "value" : "[variables('nodeStorageName')]"
           },
           "subnetRef" : {
             "value" : "[variables('infranodeSubnetRef')]"
@@ -1023,8 +988,8 @@
           "baseTemplateUrl" : {
             "value" : "[variables('baseTemplateUrl')]"
           },
-          "imageReference" : {
-            "value" : "[variables(parameters('image'))]"
+          "osImageUri" : {
+            "value" : "[variables('osImageUri')]"
           },
           "dnsName" : {
             "value" : "[concat(resourceGroup().name,'i2')]"
@@ -1044,7 +1009,7 @@
       "apiVersion" : "2015-01-01",
       "dependsOn" : [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('infranodeStorageName'))]"
+        "[concat('Microsoft.Storage/storageAccounts/', variables('nodeStorageName'))]"
       ],
       "properties" : {
         "mode" : "Incremental",
@@ -1057,7 +1022,7 @@
             "value" : "infranode3"
           },
           "sa" : {
-            "value" : "[variables('infranodeStorageName')]"
+            "value" : "[variables('nodeStorageName')]"
           },
           "subnetRef" : {
             "value" : "[variables('infranodeSubnetRef')]"
@@ -1074,8 +1039,8 @@
           "baseTemplateUrl" : {
             "value" : "[variables('baseTemplateUrl')]"
           },
-          "imageReference" : {
-            "value" : "[variables(parameters('image'))]"
+          "osImageUri" : {
+            "value" : "[variables('osImageUri')]"
           },
           "dnsName" : {
             "value" : "[concat(resourceGroup().name,'i3')]"

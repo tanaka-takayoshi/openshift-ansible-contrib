@@ -38,12 +38,6 @@
     "routerExtIP" : {
       "type" : "string"
     },
-    "imageReference" : {
-      "type" : "object",
-      "metadata" : {
-        "description" : "imageReference object that should be used to create the virtual machine"
-      }
-    },
     "RHNUserName" : {
       "type" : "string"
     },
@@ -70,6 +64,9 @@
       "metadata" : {
         "description" : "availabilityset"
       }
+    },
+    "osImageUri": {
+      "type": "string"
     }
   },
   "variables" : {
@@ -142,9 +139,12 @@
           }
         },
         "storageProfile" : {
-          "imageReference" : "[parameters('imageReference')]",
           "osDisk" : {
             "name" : "osdisk",
+            "osType": "linux",
+            "image": {
+              "uri": "[parameters('osImageUri')]"
+            },
             "vhd" : {
               "uri" : "[concat('http://', parameters('sa'), '.blob.core.windows.net/openshiftvmachines/', parameters('vmName'), '.vhd')]"
             },
